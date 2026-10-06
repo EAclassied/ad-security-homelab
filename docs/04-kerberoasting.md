@@ -100,7 +100,10 @@ attack chain were valid:
 ```bash
 hashcat -m 19700 spn_hash.txt test_pw.txt   # test_pw.txt containing "Summer2024!"
 ```
-Status...........: Cracked
+
+![Hashcat confirming the Kerberoast hash cracked successfully](../screenshots/08-kerberoast-cracked.png)
+
+Status...........: Cracked 
 Recovered........: 1/1 (100.00%)
 Candidates.#01...: Summer2024! -> Summer2024!
 
