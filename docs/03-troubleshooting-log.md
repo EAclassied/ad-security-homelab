@@ -45,6 +45,8 @@ showed `jdoe` was sitting in the built-in `Users` container, not the
 `Employees` OU. GPOs cannot link to the built-in `Users` container at all —
 it's a legacy container, not a true OU.
 
+![AD users and groups shown during GPO troubleshooting](../screenshots/DC01-populated.png)
+
 **Root cause:** `New-ADUser` defaults to the `Users` container when `-Path`
 isn't explicitly specified.
 
@@ -97,6 +99,10 @@ nltest /dsgetdc:lab.internal
 Both failed, confirming domain controller discovery (which strictly requires
 DNS) was broken, even though file share access "appeared" fine.
 
+![Resolve-DnsName failing after DNS was pointed at a public resolver](../screenshots/DnsResolveFail.png)
+
+![CLIENT01 unable to access the mapped drive while DNS was broken](../screenshots/FailedAccessonCLIENT01.png)
+
 **Fix:**
 ```powershell
 Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 192.168.50.10
@@ -120,6 +126,8 @@ ping DC01                                          # succeeded
 ```
 The contrast (ping working, port 445 closed) isolated the issue specifically
 to SMB/file sharing rather than general connectivity or DNS.
+
+![Test-NetConnection showing port 445 closed, then open again after restarting the service](../screenshots/Test-NetConnection.png)
 
 **Complication:** After restarting the service, port 445 still showed open
 on a prior check — the SMB kernel-mode listener didn't immediately release
