@@ -9,6 +9,14 @@ Created to mirror a realistic small-org structure:
 - `Sales`
 - `HR`
 
+Domain confirmed via:
+
+```powershell
+Get-ADDomain
+```
+
+![Get-ADDomain output confirming the lab.internal domain](../screenshots/Get-ADDomain.png)
+
 ## Users and groups
 
 Sample users were created in their respective OUs via PowerShell:
@@ -43,6 +51,10 @@ Set-ADDefaultDomainPasswordPolicy -Identity lab.internal `
 
 Verified with `Get-ADDefaultDomainPasswordPolicy`.
 
+Enforcement confirmed — attempting to set a weak password was rejected:
+
+![Set-ADAccountPassword rejecting a weak password due to domain policy](../screenshots/WeakPassword.png)
+
 ## File share with layered permissions
 
 A shared folder was created on DC01, with access controlled at both the share
@@ -52,22 +64,4 @@ and NTFS level, restricted to the `Sales-Team` security group:
 New-Item -Path "C:\Shares\SalesDocs" -ItemType Directory
 New-SmbShare -Name "SalesDocs" -Path "C:\Shares\SalesDocs" -FullAccess "LAB\Domain Admins"
 Grant-SmbShareAccess -Name "SalesDocs" -AccountName "LAB\Sales-Team" -AccessRight Change -Force
-icacls "C:\Shares\SalesDocs" /grant "LAB\Sales-Team:(OI)(CI)M"
-```
-
-Access was verified three ways:
-1. `mross` (Sales-Team member) can read/write to the share
-2. `jdoe` (Employees OU, not in Sales-Team) does not see the mapped drive at all
-3. `jdoe` is denied even when browsing to the share by direct UNC path
-
-This confirms the GPO drive mapping is a convenience layer, not the actual
-security boundary — share and NTFS permissions are what enforce access.
-
-## Group Policy
-
-**Employee-Restrictions** (linked to `Employees` OU): disables Control Panel
-access via `User Configuration → Administrative Templates → Control Panel →
-Prohibit access to Control Panel and PC settings`.
-
-**Sales-DriveMap** (linked to `Sales` OU): maps `\\DC01\SalesDocs` to `S:` via
-`User Configuration → Preferences → Windows Settings → Drive Maps`.
+icacls "C:\Shares\SalesDocs" /grant
